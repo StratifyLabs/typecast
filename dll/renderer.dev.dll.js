@@ -135,6 +135,18 @@ eval("module.exports = bootstrap;\n\n//# sourceURL=webpack://renderer/external_%
 
 /***/ }),
 
+/***/ "core-js":
+/*!**************************!*\
+  !*** external "core-js" ***!
+  \**************************/
+/*! no static exports found */
+/*! all exports used */
+/***/ (function(module, exports) {
+
+eval("module.exports = core-js;\n\n//# sourceURL=webpack://renderer/external_%22core-js%22?");
+
+/***/ }),
+
 /***/ "devtron":
 /*!**************************!*\
   !*** external "devtron" ***!
