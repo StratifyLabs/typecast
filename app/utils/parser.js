@@ -1,43 +1,5 @@
 
-function parseLs(context, input){
-    const lines = input.split('\n');
-    var i = 0;
-
-    if( context.state === null ){
-        //first line is the total
-        let firstTokens = lines[0].split(" ");
-        if( firstTokens.length > 1 ){
-            context.state = { total: firstTokens[1] };
-            i = 1;
-        }
-        context.output.type = "Pre";
-    } 
-
-    while(i < lines.length ){
-        line = lines[i].split(" ");
-        if( line.length == 1 ){
-            //just a simple output
-            context.output.content += line;
-            if( line != "" ){
-                context.output.content += '\n';
-            } 
-        } else {
-            let noEmptyTokens = line.filter(function(a){
-                return a !== "";
-            });
-            context.output.content += noEmptyTokens;
-            if(line != "" ){
-                context.output.content += '\n';
-            } 
-        }
-        i++;
-    }
-
-    context.output.id = Date.now();
-    return context;
-}
-
-function parseDefault(context, input){
+exports.defaultParser =  function(context, input, isFinal){
     context.output.type = "Pre";
     context.output.id = Date.now();
     const ansi2html = require('ansi2html')
@@ -45,29 +7,12 @@ function parseDefault(context, input){
     return context;
 }
 
-function parseSl(context, input){
-    let isReadme = context.command.find(function(element){
-        return element == '--readme'
-    });
-    console.log(`look for readme in ${context.command.length} options ${isReadme}`);
-    if( isReadme == '--readme' ){
-        console.log("use markdown");
-        context.output.type = "Markdown";
-        context.output.id = Date.now();
-        context.output.content += input;
-        return context;
-    }
-
-    console.log("use default");
-    return parseDefault(context, input);
-}
-
 exports.loadParser = function(command){
     const commandTokens = command.split(" ");
     const processName = commandTokens[0];
 
     let context = {
-        parse: parseDefault,
+        parse: exports.defaultParser,
         command: commandTokens, 
         state: null, 
         id: Date.now(),
@@ -80,10 +25,10 @@ exports.loadParser = function(command){
 
     switch(processName){
         case "ls":
-            context.parse = parseLs;
+            context.parse = require('../parsers/ls').ls;
             break;
         case "sl":
-            context.parse = parseSl;
+            context.parse = require('../parsers/sl').sl;
             break;
     }
 

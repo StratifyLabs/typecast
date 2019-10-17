@@ -88,6 +88,10 @@ function Home() {
 
       newInstance.on('exit', (code) => {
         console.log(`exit code is ${code}`);
+        if( parser !== null ){
+          //parser.parse(parser, "", true);
+          console.log("finalize parser");
+        }
         setInstance(null);
       });
 
