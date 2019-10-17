@@ -257,6 +257,7 @@
     "@fortawesome/fontawesome-free": "^5.5.0",
     "ansi2html": "0.0.1",
     "bootstrap": "^4.3.1",
+    "core-js": "^3.3.2",
     "devtron": "^1.4.0",
     "electron-debug": "^2.0.0",
     "electron-log": "^2.2.17",
