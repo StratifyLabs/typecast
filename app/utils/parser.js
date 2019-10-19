@@ -1,36 +1,27 @@
 
-exports.defaultParser =  function(context, input, isFinal){
-    context.output.type = "Pre";
-    context.output.id = Date.now();
-    const ansi2html = require('ansi2html')
-    context.output.content += ansi2html(input);
-    return context;
-}
+import Output from './Output';
+import * as Util from '../utils/Util';
 
-exports.loadParser = function(command){
-    const commandTokens = command.split(" ");
-    const processName = commandTokens[0];
+function Parser(commandTokens) {
+    this.command = commandTokens;
+    this.outputArray = [];
+    this.state = null;
 
-    let context = {
-        parse: exports.defaultParser,
-        command: commandTokens, 
-        state: null, 
-        id: Date.now(),
-        output: {
-            type: null,
-            id: null,
-            content: ""
-        }
-    };
+    this.parse = Util.defaultParser;
 
-    switch(processName){
-        case "ls":
-            context.parse = require('../parsers/ls').ls;
-            break;
-        case "sl":
-            context.parse = require('../parsers/sl').sl;
-            break;
+    this.isOption = (option) => {
+        this.command.find(function (element) {
+            return element == option;
+        });
     }
 
-    return context;
+
+    this.findId = (id) => {
+        this.outputArray.find(function (output) {
+            return output.id == id;
+        });
+    }
 }
+
+export default Parser;
+

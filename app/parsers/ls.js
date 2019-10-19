@@ -1,38 +1,57 @@
 
-exports.ls = function(context, input, isFinal = false){
-    const lines = input.split('\n');
-    var i = 0;
+import Output from '../utils/Output';
 
-    if( context.state === null ){
+export default function ls(parser, input, isFinal = false){
+    const lines = input.split('\n');
+
+    let output = null;
+
+    if( parser.outputArray.length == 0 ){
         //first line is the total
+        let type = "Pre";
+        let content = "";
         let firstTokens = lines[0].split(" ");
-        if( firstTokens.length > 1 ){
-            context.state = { total: firstTokens[1] };
-            i = 1;
+        parser.state = {
+            count: 0
         }
-        context.output.type = "Pre";
-    } 
+        if( firstTokens.length > 1 ){
+            console.log("init state");
+            type = "Markdown";
+            content = "Permissions | ino | owner | group | size | month | day | time | name\n";
+            content += "-----|-----|----|-----|-----|-----|-----|-----|-----\n";
+            parser.state.count = 1;
+        }
+        output = new Output(type, content);
+        parser.outputArray.push(output);
+    } else {
+        output = parser.outputArray[0];
+    }
+
+    let i = parser.state.count;
 
     while(i < lines.length ){
-        line = lines[i].split(" ");
-        if( line.length == 1 ){
+        let line = lines[i].split(" ");
+
+        if( output.type == "Pre" ){
             //just a simple output
-            context.output.content += line;
-            if( line != "" ){
-                context.output.content += '\n';
+            output.content += lines[i];
+            if( lines[i] != "" ){
+                output.content += '\n';
             } 
         } else {
+            //create a markdown table
             let noEmptyTokens = line.filter(function(a){
                 return a !== "";
             });
-            context.output.content += noEmptyTokens;
-            if(line != "" ){
-                context.output.content += '\n';
-            } 
+            for(var j = 0; j < noEmptyTokens.length; j++){
+                console.log(`add token to table ${noEmptyTokens[j]}`);
+                output.content += noEmptyTokens[j];
+                if( j < noEmptyTokens.length-1 ){
+                    output.content += " | ";
+                }
+            }
+            output.content += '\n';
         }
         i++;
     }
-
-    context.output.id = Date.now();
-    return context;
 }

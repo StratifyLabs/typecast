@@ -3,6 +3,7 @@ import React, { useState, useEffect } from 'react';
 import Navbar from 'react-bootstrap/Navbar';
 import Form from 'react-bootstrap/Form';
 import Renderer from './Renderer';
+import * as Util from '../utils/Util';
 
 function Home() {
 
@@ -46,37 +47,42 @@ function Home() {
     }
   }
 
+  function processOutput(parser) {
+    //some data is ready
+    console.log(parser.outputArray);
+    parser.outputArray.map((parserOutputElement) => {
+      let targetComponent = components.find(function (element) {
+        return element.id == parserOutputElement.id;
+      });
+
+      if (targetComponent === undefined){
+        console.log("push output");
+        components.push(parserOutputElement);
+      }
+
+    });
+
+    setComponents(components);
+    setIsTimeToScroll(true);
+
+  }
+
   function executeCommand() {
     if (instance == null) {
-      const launch = require('../utils/launch').launch;
-      const loadParser = require('../utils/parser.js').loadParser;
-      parser = loadParser(input);
+      parser = Util.loadParser(input);
       setParser(parser);
 
-      let newInstance = launch(input);
+      console.log(parser);
 
+      let newInstance = Util.launch(input);
       newInstance.stdout.on('data', (data) => {
 
         if (parser !== null) {
           //parse will modifiy parser
           parser.parse(parser, data.toString());
+          processOutput(parser);
           setParser(parser); //update the context
 
-          if (parser.output !== null) {
-            //some data is ready
-
-            let exists = components.find(function(element){
-              return element.id == parser.output.id;
-            });
-            console.log(`exists is ${exists}`);
-            if( exists === undefined ){
-              components.push(parser.output);
-            } else {
-              //exists = parser.output;
-            }
-            setComponents(components);
-            setIsTimeToScroll(true);
-          }
         } else {
           console.log("parser is null");
         }
@@ -88,8 +94,11 @@ function Home() {
 
       newInstance.on('exit', (code) => {
         console.log(`exit code is ${code}`);
-        if( parser !== null ){
-          //parser.parse(parser, "", true);
+        if (parser !== null) {
+          console.log(`about to finalize parser ${parser}`)
+          parser.parse(parser, "", true);
+          processOutput(parser);
+          setParser(null);
           console.log("finalize parser");
         }
         setInstance(null);
@@ -109,7 +118,7 @@ function Home() {
   return (
     <div className="container-fluid w-100 h-100 bg-dark text-light fill">
       {
-        components.map((object, idx) => {
+        components.map((object) => {
           return <Renderer
             key={object.id}
             object={object}
